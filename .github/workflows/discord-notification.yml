@@ -26,4 +26,42 @@ jobs:
           COMMIT_MESSAGE: ${{ env.COMMIT_MESSAGE }}
           COMMIT_DESCRIPTION: ${{ env.COMMIT_DESCRIPTION }}
         run: |
-          curl -X POST -H "Content-Type: application/json" -d "{\"username\": \"GitHub Action\", \"content\": \"**New Push Detected**\n**Author:** $COMMIT_AUTHOR\n**Date:** $COMMIT_DATE\n**Message:** $COMMIT_MESSAGE\n**Description:** $COMMIT_DESCRIPTION\"}" $DISCORD_WEBHOOK_URL
+          MESSAGE=$(cat <<EOF
+{
+  "username": "GitHub Buddy",
+  "embeds": [
+    {
+      "title": "Nuevo Push Detectado",
+      "description": "**Author:** $COMMIT_AUTHOR\n**Date:** $COMMIT_DATE\n**Message:** $COMMIT_MESSAGE\n**Description:** $COMMIT_DESCRIPTION",
+      "color": 3447003,
+      "fields": [
+        {
+          "name": "Author",
+          "value": "$COMMIT_AUTHOR",
+          "inline": true
+        },
+        {
+          "name": "Date",
+          "value": "$COMMIT_DATE",
+          "inline": true
+        },
+        {
+          "name": "Message",
+          "value": "$COMMIT_MESSAGE",
+          "inline": false
+        },
+        {
+          "name": "Description",
+          "value": "$COMMIT_DESCRIPTION",
+          "inline": false
+        }
+      ],
+      "footer": {
+        "text": "GitHub Actions Notification"
+      }
+    }
+  ]
+}
+EOF
+)
+          curl -X POST -H "Content-Type: application/json" -d "$MESSAGE" $DISCORD_WEBHOOK_URL
